@@ -1,6 +1,6 @@
 import Course from './components/Course';
 
-const App = () => {
+const CourseApp = () => {
   const courses = [
     {
       name: 'Half Stack application development',
@@ -55,4 +55,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default CourseApp;
