@@ -4,6 +4,7 @@ import personService from './services/persons';
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import Persons from './components/Persons';
+import Notification from './components/Notification';
 
 const PhonebookApp = () => {
   const [persons, setPersons] = useState([]);
@@ -11,6 +12,8 @@ const PhonebookApp = () => {
   const [newName, setNewName] = useState('');
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
   const [filterByName, setFilterByName] = useState('');
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     personService.getAll().then((returnedPersons) => {
@@ -43,9 +46,24 @@ const PhonebookApp = () => {
         personService
           .update(person.id, updatedPerson)
           .then((returnedPerson) => {
+            setSuccessMessage(`${returnedPerson.name}'s number was changed`);
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 5000);
             setPersons(
               persons.map((p) => (p.id === person.id ? returnedPerson : p))
             );
+            setNewName('');
+            setNewPhoneNumber('');
+          })
+          .catch((error) => {
+            setErrorMessage(
+              `Information of ${person.name} has already been removed from server`
+            );
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 5000);
+            setPersons(persons.filter((p) => p.id !== person.id));
           });
       }
       return;
@@ -57,6 +75,10 @@ const PhonebookApp = () => {
     };
 
     personService.create(newPerson).then((returnedPerson) => {
+      setSuccessMessage(`${returnedPerson.name} was added successfully!!`);
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
       setPersons([...persons, returnedPerson]);
       setNewName('');
       setNewPhoneNumber('');
@@ -67,6 +89,10 @@ const PhonebookApp = () => {
     if (window.confirm(`Delete ${name} ?`)) {
       personService.deletePerson(id).then(() => {
         const newPersons = persons.filter((person) => person.id !== id);
+        setSuccessMessage(`${name} was deleted successfully!!`);
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 5000);
         setPersons(newPersons);
       });
     }
@@ -86,6 +112,9 @@ const PhonebookApp = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={successMessage} type="success" />
+      <Notification message={errorMessage} type="error" />
+
       <Filter value={filterByName} handleSearchChange={handleSearchChange} />
       <h2>add a new</h2>
       <PersonForm
